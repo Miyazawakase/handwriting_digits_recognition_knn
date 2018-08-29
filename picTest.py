@@ -6,9 +6,12 @@ from sklearn import neighbors
 import cv2
 
 
+train_target_set = []
+train_data_set = []
+knn = None
+
+
 def load_data_set():
-    train_target_set = []
-    train_data_set = []
     with open('train.csv') as csv_train:
         csv_train = csv.reader(csv_train)
         train_set = list(csv_train)
@@ -21,11 +24,17 @@ def load_data_set():
             temp.append(train_set[i][j])
         train_data_set.append(temp)
 
-    return train_target_set, train_data_set
+    # return train_target_set, train_data_set
+
+
+def knn_train():
+    global knn
+    knn = neighbors.KNeighborsClassifier()
+    knn.fit(train_data_set, train_target_set)
 
 
 def knn_prediction():
-    train_target_set, train_data_set = load_data_set()
+    # train_target_set, train_data_set = load_data_set()
     test_data_set = []
 
     image = cv2.imread('hello.jpg')
@@ -35,10 +44,6 @@ def knn_prediction():
         for j in range(0, 28):
             test_data_set.append(image_resize[i][j])
 
-    print "Data ready"
-    knn = neighbors.KNeighborsClassifier()
-    knn.fit(train_data_set, train_target_set)
-    print "Training ready"
     prediction = knn.predict([test_data_set])
     print "Prediction ok"
     print prediction[0]
@@ -60,6 +65,11 @@ def tcplink(sock, addr):
 
 
 def main():
+    load_data_set()
+    print "Data ready"
+    knn_train()
+    print "Training ready"
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', 9999))
     s.listen(5)
