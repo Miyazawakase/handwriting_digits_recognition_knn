@@ -56,8 +56,8 @@ def knn_prediction():
                 image_resize[i][j] = 255
             test_data_set.append(image_resize[i][j])
 
-    cv2.imshow("Hello", image_resize)
-    cv2.waitKey(0)
+    # cv2.imshow("Hello", image_resize)
+    # cv2.waitKey(0)
 
     prediction = knn.predict([test_data_set])
     print "Prediction ok"
