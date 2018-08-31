@@ -4,11 +4,14 @@ import threading
 import csv
 from sklearn import neighbors
 import cv2
+import numpy
+from sklearn.svm import SVC
 
 
 train_target_set = []
 train_data_set = []
 knn = None
+# svc = SVC()
 
 
 def load_data_set():
@@ -39,12 +42,53 @@ def knn_prediction():
 
     image = cv2.imread('hello.jpg')
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    image_resize = cv2.resize(image_gray, (28, 28))
+    image_resize = cv2.resize(image_gray, (300, 300))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+    for i in range(0, 5):
+        image_resize = cv2.erode(image_resize, kernel)
+    image_resize = cv2.resize(image_resize, (28, 28))
+
     for i in range(0, 28):
         for j in range(0, 28):
+            if image_resize[i][j] > 125:
+                image_resize[i][j] = 0
+            else:
+                image_resize[i][j] = 255
             test_data_set.append(image_resize[i][j])
 
+    cv2.imshow("Hello", image_resize)
+    cv2.waitKey(0)
+
     prediction = knn.predict([test_data_set])
+    print "Prediction ok"
+    print prediction[0]
+    return prediction[0]
+
+
+def svm_train():
+    global svc
+    svc.fit(numpy.array(train_data_set), numpy.array(train_target_set))
+
+
+def svm_prediction():
+    test_data_set = []
+
+    image = cv2.imread('hello.jpg')
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image_resize = cv2.resize(image_gray, (28, 28))
+
+    for i in range(0, 28):
+        for j in range(0, 28):
+            if image_resize[i][j] > 140:
+                image_resize[i][j] = 0
+            else:
+                image_resize[i][j] = 255
+            test_data_set.append(image_resize[i][j])
+
+    # cv2.imshow("Hello", image_resize)
+    # cv2.waitKey(0)
+
+    prediction = svc.predict([test_data_set])
     print "Prediction ok"
     print prediction[0]
     return prediction[0]
@@ -68,6 +112,8 @@ def main():
     load_data_set()
     print "Data ready"
     knn_train()
+    # print "Training ready"
+    # svm_train()
     print "Training ready"
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
